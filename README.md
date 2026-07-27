@@ -1,32 +1,90 @@
-# PackSmart AI ✈️
+# ✈️ PackSmart AI
 
-## Problem Statement
+An AI powered travel packing assistant that generates personalized packing checklists based on your trip details using Google Gemini AI.
 
-Packing for a trip can be overwhelming. Travelers often forget essential items, overpack unnecessary gear, or fail to account for specific weather conditions, transportation limitations, and cultural nuances of their destination. Manual checklist creation is time-consuming and prone to human error.
+---
 
-## Solution
+## 🌍 Live Demo
 
-**PackSmart AI** is a responsive web application that leverages Google's Gemini AI to generate customized, comprehensive packing checklists. By taking into account the destination, trip duration, expected weather, purpose, transport type, and budget, the AI curates exactly what you need—nothing more, nothing less.
+🔗 https://packsmart-ai-beige.vercel.app/
 
-## Features
+---
 
-- 🌍 **Smart Inputs:** Specify destination, days, weather, purpose, and budget.
-- 🤖 **AI-Powered:** Uses Google Gemini 1.5 Flash for rapid, intelligent checklist generation.
-- 📋 **Structured Output:** Automatically categorizes items (Essentials, Toiletries, Electronics, etc.).
-- 📱 **Responsive Design:** Works seamlessly on mobile, tablet, and desktop.
-- 🖨️ **Export Options:** Instantly copy the list to clipboard or download/print as a PDF.
-- ✨ **Modern UI:** Built with an attractive blue/green travel theme and smooth animations.
+# 📖 Problem Statement
 
-## AI Feature
+Packing for a trip is often stressful and time consuming. Many travelers forget important items, pack unnecessary belongings, or fail to prepare for different weather conditions, cultural expectations, transportation methods, and trip durations.
 
-The core logic of the application revolves around dynamically constructing a system prompt based on user input and sending it to the Gemini API.
+Creating a packing checklist manually takes time and often results in missed essentials, especially for international travel.
 
-### System Prompt
+---
+
+# 💡 Solution
+
+PackSmart AI is an intelligent travel packing assistant that automatically generates a personalized packing checklist using Google's Gemini AI.
+
+Instead of using a generic checklist, the application analyzes the user's travel information and produces recommendations specific to the destination and travel requirements.
+
+The application is designed for:
+
+- Solo travelers
+- Families
+- Business travelers
+- Vacation travelers
+- Students
+- Pilgrims travelling for Umrah or Hajj
+- Anyone who wants to pack efficiently without forgetting essential items
+
+---
+
+# ✨ Features
+
+PackSmart AI includes the following features:
+
+- AI powered packing checklist generation
+- Personalized recommendations based on destination
+- Trip duration analysis
+- Weather based recommendations
+- Travel purpose selection
+- Transportation based suggestions
+- Budget aware recommendations
+- Travel summary generation
+- Organized checklist categories
+- Destination specific travel tips
+- Packing tips
+- Things you might forget section
+- Copy checklist to clipboard
+- Download checklist as PDF
+- Responsive design for desktop, tablet, and mobile devices
+- Modern travel themed user interface
+- Clean and easy to use form validation
+
+---
+
+# 🤖 AI Feature
+
+PackSmart AI uses Google's Gemini AI to dynamically generate a customized travel packing checklist.
+
+The application creates a prompt using the user's travel information and sends it to the Gemini API through a secure backend endpoint.
+
+The AI understands:
+
+- Destination
+- Number of travel days
+- Weather
+- Travel purpose
+- Transportation
+- Budget
+
+It then generates a structured checklist with practical recommendations.
+
+## System Prompt
 
 ```text
 You are PackSmart AI.
 You are a professional travel assistant.
+
 Generate a personalized packing checklist based on:
+
 Destination: [User Input]
 Trip duration: [User Input]
 Weather: [User Input]
@@ -34,8 +92,124 @@ Travel purpose: [User Input]
 Transportation: [User Input]
 Budget: [User Input]
 
-Return the answer using these headings.
-Travel Summary, Essential Clothing, Footwear, Toiletries, Electronics, Travel Documents, Health Items, Food and Snacks, Optional Items, Things You Might Forget, Local Travel Tips, Packing Tips.
+Return the answer using these headings:
 
-Rules: Keep answers concise. Suggest realistic quantities. Make recommendations based on weather. Give destination specific advice. Return checklist items using checkbox symbols.
+Travel Summary
+Essential Clothing
+Footwear
+Toiletries
+Electronics
+Travel Documents
+Health Items
+Food and Snacks
+Optional Items
+Things You Might Forget
+Local Travel Tips
+Packing Tips
+
+Rules:
+
+Keep answers concise.
+
+Suggest realistic quantities.
+
+Make recommendations based on weather.
+
+Give destination specific advice.
+
+Return checklist items using checkbox symbols.
 ```
+
+---
+
+# 🛠 Technologies Used
+
+### Frontend
+
+- HTML5
+- CSS3
+- JavaScript (ES6)
+
+### Backend
+
+- Vercel Serverless Functions
+- Node.js
+
+### AI Model
+
+- Google Gemini 2.5 Flash
+
+### APIs
+
+- Google Gemini API inside vercel environment variables
+
+### Deployment
+
+- Vercel
+
+### Other Libraries
+
+- Font Awesome
+- jsPDF
+- html2canvas
+
+---
+
+---
+
+# 📂 Project Structure
+
+```
+PackSmart-AI
+│
+├── api
+│   └── generate.js
+── style.css
+── script.js
+├── index.html
+└── README.md
+```
+
+---
+
+# 🎯 Example Use Case
+
+### User Input
+
+- Destination: Makkah
+- Trip Duration: 25 Days
+- Weather: Hot
+- Purpose: Family Trip
+- Transportation: Flight
+- Budget: High
+
+### AI Output
+
+The application generates:
+
+- Travel Summary
+- Essential Clothing
+- Footwear
+- Toiletries
+- Electronics
+- Travel Documents
+- Health Items
+- Food and Snacks
+- Optional Items
+- Things You Might Forget
+- Local Travel Tips
+- Packing Tips
+
+The checklist is personalized specifically for the selected destination and travel conditions.
+
+---
+
+# 👨‍💻 Author
+
+Developed by Adan Nasrullah
+
+BS Computer Science
+
+University of Education
+
+---
