@@ -1,13 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Safety check to ensure config.js is linked in the HTML and loaded
-  if (typeof config === "undefined" || !config.API_KEY) {
-    console.error(
-      "Configuration missing! Please ensure config.js is linked in your index.html and contains API_KEY.",
-    );
-  }
-
-  const GEMINI_API_KEY = typeof config !== "undefined" ? config.API_KEY : "";
-
   // DOM Elements
   const form = document.getElementById("packing-form");
   const destInput = document.getElementById("destination");
@@ -109,7 +100,7 @@ Give destination specific advice for ${destination}.
 Return ALL checklist items using checkbox symbols like '✅' or '[ ]'.`;
 
     try {
-      // Call Gemini API
+      // Call Vercel Serverless Function Proxy
       const responseText = await fetchGeminiResponse(systemPrompt);
 
       // Format and Display Response
@@ -125,19 +116,13 @@ Return ALL checklist items using checkbox symbols like '✅' or '[ ]'.`;
     } catch (error) {
       loadingSpinner.classList.add("hidden");
       form.classList.remove("hidden");
-      errorMessage.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Error: ${error.message}. Make sure your API key in config.js is correct!`;
+      errorMessage.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Error: ${error.message}`;
       errorMessage.classList.remove("hidden");
     }
   });
 
-  // Fetch call to Gemini API using standard REST payload
+  // Fetch call to Vercel Backend Proxy (/api/generate)
   async function fetchGeminiResponse(prompt) {
-    if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
-      throw new Error("API Key is missing or invalid. Please update config.js");
-    }
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
     const payload = {
       contents: [
         {
@@ -149,43 +134,37 @@ Return ALL checklist items using checkbox symbols like '✅' or '[ ]'.`;
       },
     };
 
-    const response = await fetch(url, {
+    const response = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error.message || "Failed to generate checklist");
+      throw new Error(data.error?.message || "Failed to generate checklist");
     }
 
-    const data = await response.json();
     return data.candidates[0].content.parts[0].text;
   }
 
-  // Improved Markdown Parser (Handles headers, bold, italics, paragraphs, and unordered lists)
+  // Markdown Parser
   function formatMarkdown(text) {
     let html = text
-      // Replace ### Headings
       .replace(/^### (.*$)/gim, "<h3>$1</h3>")
-      // Replace ## Headings
       .replace(/^## (.*$)/gim, "<h2>$1</h2>")
-      // Replace **Bold**
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      // Replace *Italics*
       .replace(/\*(.*?)\*/g, "<em>$1</em>");
 
-    // Process lines for paragraphs and lists
     const lines = html.split("\n");
     let inList = false;
     let result = [];
 
     lines.forEach((line) => {
       const trimmed = line.trim();
-      if (!trimmed) return; // Skip empty lines
+      if (!trimmed) return;
 
-      // If line is a heading (already processed to HTML above)
       if (trimmed.startsWith("<h")) {
         if (inList) {
           result.push("</ul>");
@@ -195,7 +174,6 @@ Return ALL checklist items using checkbox symbols like '✅' or '[ ]'.`;
         return;
       }
 
-      // Check if line is a list item (Starts with ✅, [ ], *, or -)
       const isListItem = /^[*\-✅]/.test(trimmed) || trimmed.startsWith("[ ]");
 
       if (isListItem) {
@@ -213,17 +191,13 @@ Return ALL checklist items using checkbox symbols like '✅' or '[ ]'.`;
       }
     });
 
-    // Close list if it was the last element
     if (inList) result.push("</ul>");
 
     return result.join("\n");
   }
 
-  // --- Action Buttons Functionality ---
-
-  // Copy to Clipboard
+  // Action Buttons
   btnCopy.addEventListener("click", () => {
-    // Create a temporary textarea to hold un-HTML-ified text
     const tempElement = document.createElement("div");
     tempElement.innerHTML = aiResponseContent.innerHTML;
     const plainText = tempElement.innerText;
@@ -235,12 +209,10 @@ Return ALL checklist items using checkbox symbols like '✅' or '[ ]'.`;
     });
   });
 
-  // Download PDF (Using browser Print functionality via CSS @media print)
   btnPdf.addEventListener("click", () => {
     window.print();
   });
 
-  // Clear Form & Results
   btnClear.addEventListener("click", () => {
     form.reset();
     charCount.textContent = "0";

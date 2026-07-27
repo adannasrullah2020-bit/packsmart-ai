@@ -1,32 +1,46 @@
 export default async function handler(req, res) {
   // Only allow POST requests
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({ error: { message: "Method not allowed" } });
   }
 
-  // Securely pull the API key from Vercel's environment variables
+  // Pull API key from Vercel Environment Variables
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "API key not configured" });
+    return res
+      .status(500)
+      .json({
+        error: {
+          message: "API key is missing in Vercel Environment Variables.",
+        },
+      });
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  // Use Gemini REST endpoint
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   try {
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: req.body.prompt }] }],
-        generationConfig: { temperature: 0.7 },
+        contents: req.body.contents,
+        generationConfig: req.body.generationConfig || { temperature: 0.7 },
       }),
     });
 
     const data = await response.json();
 
-    // Return the Gemini response to your frontend
-    res.status(200).json(data);
+    if (!response.ok) {
+      return res.status(response.status).json(data);
+    }
+
+    return res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch from Gemini" });
+    return res
+      .status(500)
+      .json({
+        error: { message: error.message || "Failed to fetch from Gemini API" },
+      });
   }
 }
