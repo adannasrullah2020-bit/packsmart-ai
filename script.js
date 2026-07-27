@@ -1,5 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const GEMINI_API_KEY = config.API_KEY;
+  // Safety check to ensure config.js is linked in the HTML and loaded
+  if (typeof config === "undefined" || !config.API_KEY) {
+    console.error(
+      "Configuration missing! Please ensure config.js is linked in your index.html and contains API_KEY.",
+    );
+  }
+
+  const GEMINI_API_KEY = typeof config !== "undefined" ? config.API_KEY : "";
 
   // DOM Elements
   const form = document.getElementById("packing-form");
@@ -111,22 +118,22 @@ Return ALL checklist items using checkbox symbols like '✅' or '[ ]'.`;
       // UI Updates
       loadingSpinner.classList.add("hidden");
       resultSection.classList.remove("hidden");
-      form.classList.remove("hidden"); // Keep form available below (or hide it entirely based on preference)
+      form.classList.remove("hidden");
 
       // Smooth scroll to results
       resultSection.scrollIntoView({ behavior: "smooth" });
     } catch (error) {
       loadingSpinner.classList.add("hidden");
       form.classList.remove("hidden");
-      errorMessage.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Error: ${error.message}. Make sure you added your API key!`;
+      errorMessage.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Error: ${error.message}. Make sure your API key in config.js is correct!`;
       errorMessage.classList.remove("hidden");
     }
   });
 
   // Fetch call to Gemini API using standard REST payload
   async function fetchGeminiResponse(prompt) {
-    if (GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
-      throw new Error("API Key is missing. Please update script.js");
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+      throw new Error("API Key is missing or invalid. Please update config.js");
     }
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
@@ -157,23 +164,59 @@ Return ALL checklist items using checkbox symbols like '✅' or '[ ]'.`;
     return data.candidates[0].content.parts[0].text;
   }
 
-  // Simple Markdown Parser (Handles headers, bold, and list formatting)
+  // Improved Markdown Parser (Handles headers, bold, italics, paragraphs, and unordered lists)
   function formatMarkdown(text) {
-    let formattedText = text
-      // Replace ## Headings
-      .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+    let html = text
       // Replace ### Headings
       .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+      // Replace ## Headings
+      .replace(/^## (.*$)/gim, "<h2>$1</h2>")
       // Replace **Bold**
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
       // Replace *Italics*
-      .replace(/\*(.*?)\*/g, "<em>$1</em>")
-      // Replace line breaks
-      .replace(/\n/g, "<br>");
+      .replace(/\*(.*?)\*/g, "<em>$1</em>");
 
-    // Clean up excessive break tags
-    formattedText = formattedText.replace(/(<br>\s*){2,}/g, "<br><br>");
-    return formattedText;
+    // Process lines for paragraphs and lists
+    const lines = html.split("\n");
+    let inList = false;
+    let result = [];
+
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return; // Skip empty lines
+
+      // If line is a heading (already processed to HTML above)
+      if (trimmed.startsWith("<h")) {
+        if (inList) {
+          result.push("</ul>");
+          inList = false;
+        }
+        result.push(trimmed);
+        return;
+      }
+
+      // Check if line is a list item (Starts with ✅, [ ], *, or -)
+      const isListItem = /^[*\-✅]/.test(trimmed) || trimmed.startsWith("[ ]");
+
+      if (isListItem) {
+        if (!inList) {
+          result.push("<ul>");
+          inList = true;
+        }
+        result.push(`<li>${trimmed}</li>`);
+      } else {
+        if (inList) {
+          result.push("</ul>");
+          inList = false;
+        }
+        result.push(`<p>${trimmed}</p>`);
+      }
+    });
+
+    // Close list if it was the last element
+    if (inList) result.push("</ul>");
+
+    return result.join("\n");
   }
 
   // --- Action Buttons Functionality ---
